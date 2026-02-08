@@ -1,3 +1,14 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import Todo, TodoItem
+
+class TodoItemInline(admin.TabularInline):
+    model = TodoItem
+
+
+class TodoAdmin(admin.ModelAdmin):
+    inlines = [
+        TodoItemInline
+    ]
+
+admin.site.register(Todo, TodoAdmin)
