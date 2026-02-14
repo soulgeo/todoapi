@@ -2,6 +2,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
 
 from .models import Todo, TodoItem
 from .serializers import TodoItemSerializer, TodoSerializer
@@ -40,7 +41,7 @@ def list_todos(request):
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def todo(request, id):
-    todo = Todo.objects.prefetch_related('items').get(id=id)
+    todo = get_object_or_404(Todo.objects.prefetch_related('items'), id=id)
     if todo.user != request.user:
         return _forbidden()
 
@@ -68,7 +69,7 @@ def todo(request, id):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_todo_item(request, id):
-    todo = Todo.objects.get(id=id)
+    todo = get_object_or_404(Todo, id=id)
     if todo.user != request.user:
         return _forbidden()
 
@@ -85,13 +86,13 @@ def create_todo_item(request, id):
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def todo_item(request, id, iid):
-    todo = Todo.objects.get(id=id)
+    todo = get_object_or_404(Todo, id=id)
     if todo.user != request.user:
         return _forbidden()
 
-    item = TodoItem.objects.get(id=iid)
+    item = get_object_or_404(TodoItem, id=iid)
     if item.todo != todo:
-        error = {'error': 'The todo has no item matching the iid provided.'}
+        error = {'error': 'This Todo has no Item matching the iid provided.'}
         return _bad_request(error)
 
     if request.method == 'GET':
