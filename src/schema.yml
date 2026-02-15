@@ -1,0 +1,506 @@
+openapi: 3.0.3
+info:
+  title: TodoAPI
+  version: 1.0.0
+  description: A simple todo list API built for the purposes of the SaaS class @UniPi
+paths:
+  /auth/login:
+    post:
+      operationId: auth_login_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Login'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Login'
+        required: true
+      security:
+      - tokenAuth: []
+      - basicAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+          description: ''
+  /auth/logout:
+    get:
+      operationId: auth_logout_retrieve
+      tags:
+      - auth
+      security:
+      - tokenAuth: []
+      - basicAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogoutResponse'
+          description: ''
+  /signup:
+    post:
+      operationId: signup_create
+      tags:
+      - signup
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegistration'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserRegistration'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserRegistration'
+        required: true
+      security:
+      - tokenAuth: []
+      - basicAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRegistrationResponse'
+          description: ''
+  /todos/:
+    get:
+      operationId: todos_list
+      tags:
+      - todos
+      security:
+      - tokenAuth: []
+      - basicAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Todo'
+          description: ''
+    post:
+      operationId: todos_create
+      tags:
+      - todos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Todo'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Todo'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Todo'
+        required: true
+      security:
+      - tokenAuth: []
+      - basicAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoCreateResponse'
+          description: ''
+  /todos/{id}:
+    get:
+      operationId: todos_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - todos
+      security:
+      - tokenAuth: []
+      - basicAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+          description: ''
+    put:
+      operationId: todos_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - todos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Todo'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Todo'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Todo'
+        required: true
+      security:
+      - tokenAuth: []
+      - basicAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoUpdateResponse'
+          description: ''
+    delete:
+      operationId: todos_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - todos
+      security:
+      - tokenAuth: []
+      - basicAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoDeleteResponse'
+          description: ''
+  /todos/{id}/items:
+    post:
+      operationId: todos_items_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - todos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TodoItem'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TodoItem'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TodoItem'
+        required: true
+      security:
+      - tokenAuth: []
+      - basicAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoItemCreateResponse'
+          description: ''
+  /todos/{id}/items/{iid}:
+    get:
+      operationId: todos_items_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: iid
+        schema:
+          type: integer
+        required: true
+      tags:
+      - todos
+      security:
+      - tokenAuth: []
+      - basicAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoItem'
+          description: ''
+    put:
+      operationId: todos_items_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: iid
+        schema:
+          type: integer
+        required: true
+      tags:
+      - todos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TodoItem'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TodoItem'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TodoItem'
+        required: true
+      security:
+      - tokenAuth: []
+      - basicAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoItemUpdateResponse'
+          description: ''
+    delete:
+      operationId: todos_items_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: iid
+        schema:
+          type: integer
+        required: true
+      tags:
+      - todos
+      security:
+      - tokenAuth: []
+      - basicAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoItemDeleteResponse'
+          description: ''
+components:
+  schemas:
+    Login:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required:
+      - password
+      - username
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        user_id:
+          type: integer
+      required:
+      - token
+      - user_id
+    LogoutResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+      - message
+    Todo:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        user:
+          type: integer
+          readOnly: true
+        description:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TodoItem'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - items
+      - name
+      - updated_at
+      - user
+    TodoCreateResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        id:
+          type: integer
+      required:
+      - id
+      - message
+    TodoDeleteResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+      - message
+    TodoItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        todo:
+          type: integer
+          readOnly: true
+        is_complete:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - name
+      - todo
+      - updated_at
+    TodoItemCreateResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+      - message
+    TodoItemDeleteResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+      - message
+    TodoItemUpdateResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+      - message
+    TodoUpdateResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+      - message
+    UserRegistration:
+      type: object
+      properties:
+        username:
+          type: string
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          maxLength: 100
+        password:
+          type: string
+          maxLength: 100
+        password2:
+          type: string
+          writeOnly: true
+      required:
+      - email
+      - password
+      - password2
+      - username
+    UserRegistrationResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        user_id:
+          type: integer
+      required:
+      - message
+      - user_id
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+    tokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Token-based authentication with required prefix "Token"

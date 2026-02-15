@@ -1,6 +1,6 @@
 from typing import cast
 from django.contrib.auth import authenticate
-from rest_framework import status
+from rest_framework import serializers, status
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -8,10 +8,20 @@ from rest_framework.response import Response
 from rest_framework.views import status
 
 from accounts.models import User
+from drf_spectacular.utils import extend_schema, inline_serializer
 
-from .serializers import UserRegistrationSerializer
+from .serializers import (
+    LoginResponseSerializer,
+    LoginSerializer,
+    UserRegistrationResponseSerializer,
+    UserRegistrationSerializer,
+)
 
 
+@extend_schema(
+    request=UserRegistrationSerializer,
+    responses={200: UserRegistrationResponseSerializer},
+)
 @api_view(['POST'])
 def signup(request):
     serializer = UserRegistrationSerializer(data=request.data)
@@ -28,6 +38,10 @@ def signup(request):
     )
 
 
+@extend_schema(
+    request=LoginSerializer,
+    responses={200: LoginResponseSerializer},
+)
 @api_view(['POST'])
 def login(request):
     username = request.data.get('username')
@@ -51,6 +65,7 @@ def login(request):
     )
 
 
+@extend_schema(responses={200: inline_serializer('LogoutResponse', fields={'message': serializers.CharField()})})
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def logout(request):

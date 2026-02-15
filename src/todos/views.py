@@ -1,10 +1,12 @@
 from typing import cast
 
 from django.shortcuts import get_object_or_404
-from rest_framework import status
+from rest_framework import serializers, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+
+from drf_spectacular.utils import extend_schema, inline_serializer
 
 from .models import Todo, TodoItem
 from .serializers import TodoItemSerializer, TodoSerializer
@@ -21,6 +23,23 @@ def _forbidden():
     )
 
 
+@extend_schema(
+    methods=['GET'],
+    responses={200: TodoSerializer(many=True)},
+)
+@extend_schema(
+    methods=['POST'],
+    request=TodoSerializer,
+    responses={
+        200: inline_serializer(
+            name='TodoCreateResponse',
+            fields={
+                'message': serializers.CharField(),
+                'id': serializers.IntegerField(),
+            },
+        )
+    },
+)
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def list_todos(request):
@@ -41,6 +60,29 @@ def list_todos(request):
         )
 
 
+@extend_schema(
+    methods=['GET'],
+    responses={200: TodoSerializer},
+)
+@extend_schema(
+    methods=['PUT'],
+    request=TodoSerializer,
+    responses={
+        200: inline_serializer(
+            name='TodoUpdateResponse',
+            fields={'message': serializers.CharField()},
+        )
+    },
+)
+@extend_schema(
+    methods=['DELETE'],
+    responses={
+        200: inline_serializer(
+            name='TodoDeleteResponse',
+            fields={'message': serializers.CharField()},
+        )
+    },
+)
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def todo(request, id):
@@ -69,6 +111,15 @@ def todo(request, id):
         )
 
 
+@extend_schema(
+    request=TodoItemSerializer,
+    responses={
+        200: inline_serializer(
+            name='TodoItemCreateResponse',
+            fields={'message': serializers.CharField()},
+        )
+    },
+)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_todo_item(request, id):
@@ -86,6 +137,29 @@ def create_todo_item(request, id):
     )
 
 
+@extend_schema(
+    methods=['GET'],
+    responses={200: TodoItemSerializer},
+)
+@extend_schema(
+    methods=['PUT'],
+    request=TodoItemSerializer,
+    responses={
+        200: inline_serializer(
+            name='TodoItemUpdateResponse',
+            fields={'message': serializers.CharField()},
+        )
+    },
+)
+@extend_schema(
+    methods=['DELETE'],
+    responses={
+        200: inline_serializer(
+            name='TodoItemDeleteResponse',
+            fields={'message': serializers.CharField()},
+        )
+    },
+)
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def todo_item(request, id, iid):
