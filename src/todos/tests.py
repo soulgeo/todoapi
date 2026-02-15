@@ -7,14 +7,14 @@ from rest_framework.test import APITestCase
 
 from accounts.models import User
 
-from .models import Todo
+from .models import Todo, TodoItem
 
 
 class TodoAPITestCase(APITestCase):
     def setUp(self):
         self.username = 'foo'
-        self.email = 'foo@bar.com'
         self.password = 'bar'
+        self.email = 'foo@bar.com'
         self.todo_name = "test_todo"
         self.todo_description = "lorem ipsum"
 
@@ -160,3 +160,146 @@ class TodoAPITestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertFalse(Todo.objects.filter(id=self.todo.pk).exists())
+
+
+class TodoItemAPITestCase(APITestCase):
+    def setUp(self):
+        self.username = 'foo'
+        self.password = 'bar'
+        self.email = 'foo@bar.com'
+        self.todo_name = 'test_todo'
+        self.todo_description = 'lorem ipsum'
+        self.todo_item_name = 'test_todo_item'
+
+        self.user = User.objects.create_user(
+            username=self.username, email=self.email, password=self.password
+        )
+        self.todo = Todo.objects.create(
+            name=self.todo_name,
+            user=self.user,
+            description=self.todo_description,
+        )
+
+        self.todo_item = TodoItem.objects.create(
+            name=self.todo_item_name, todo=self.todo
+        )
+
+        self.create_todo_item_url = reverse(
+            'create_todo_item', kwargs={'id': self.todo.pk}
+        )
+        self.todo_item_url = reverse(
+            'todo_item', kwargs={'id': self.todo.pk, 'iid': self.todo_item.pk}
+        )
+
+    def test_unauthorized_create_item(self):
+        data = {'name': 'new_item'}
+        response = self.client.post(self.create_todo_item_url, data=data)
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_unauthorized_get_item(self):
+        response = self.client.get(self.create_todo_item_url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_unauthorized_update_item(self):
+        data = {'name': 'new_name', 'is_complete': True}
+        response = self.client.put(self.todo_item_url, data=data)
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        self.todo_item.refresh_from_db()
+        self.assertEqual(self.todo_item.name, self.todo_item_name)
+
+    def test_unauthorized_delete_item(self):
+        response = self.client.delete(self.todo_item_url)
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertTrue(TodoItem.objects.filter(id=self.todo_item.pk).exists())
+
+    def test_other_user_cannot_create_item_in_todo_of_user(self):
+        other_user = User.objects.create_user(
+            username="bar", email="bar@foo.com", password="foo"
+        )
+        self.client.force_login(other_user)
+
+        data = {'name': 'new_item'}
+        response = self.client.post(self.create_todo_item_url, data=data)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_other_user_cannot_get_item_in_todo_of_user(self):
+        other_user = User.objects.create_user(
+            username="bar", email="bar@foo.com", password="foo"
+        )
+        self.client.force_login(other_user)
+
+        response = self.client.get(self.todo_item_url)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_other_user_cannot_update_item_in_todo_of_user(self):
+        other_user = User.objects.create_user(
+            username="bar", email="bar@foo.com", password="foo"
+        )
+        self.client.force_login(other_user)
+
+        data = {'name': 'new_name', 'is_complete': True}
+        response = self.client.put(self.todo_item_url, data=data)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        self.todo_item.refresh_from_db()
+        self.assertEqual(self.todo_item.name, self.todo_item_name)
+        self.assertEqual(self.todo_item.is_complete, False)
+
+    def test_other_user_cannot_delete_item_in_todo_of_user(self):
+        other_user = User.objects.create_user(
+            username="bar", email="bar@foo.com", password="foo"
+        )
+        self.client.force_login(other_user)
+
+        response = self.client.delete(self.todo_item_url)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertTrue(TodoItem.objects.filter(id=self.todo_item.pk).exists())
+
+    def test_user_create_item(self):
+        self.client.force_login(self.user)
+
+        data = {'name': 'new_item'}
+        response = self.client.post(self.create_todo_item_url, data=data)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_user_get_item(self):
+        self.client.force_login(self.user)
+
+        response = cast(Response, self.client.get(self.todo_item_url))
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        assert response.data is not None
+        self.assertEqual(response.data['name'], self.todo_item.name)
+        self.assertEqual(
+            response.data['is_complete'], self.todo_item.is_complete
+        )
+
+    def test_user_update_item(self):
+        self.client.force_login(self.user)
+
+        data = {'name': 'new_name', 'is_complete': True}
+        response = self.client.put(self.todo_item_url, data=data)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.todo_item.refresh_from_db()
+        self.assertEqual(self.todo_item.name, 'new_name')
+        self.assertEqual(self.todo_item.is_complete, True)
+
+    def test_user_delete_item(self):
+        self.client.force_login(self.user)
+
+        response = self.client.delete(self.todo_item_url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertFalse(TodoItem.objects.filter(id=self.todo_item.pk).exists())
