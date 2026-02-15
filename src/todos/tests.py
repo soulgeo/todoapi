@@ -115,7 +115,6 @@ class TodoAPITestCase(APITestCase):
         assert response.data is not None
         self.assertEqual(len(response.data), 3)
 
-        # Verify the IDs match our user's todos
         returned_ids = {item['id'] for item in response.data}
         expected_ids = {self.todo.pk, todo2.pk, todo3.pk}
         self.assertEqual(returned_ids, expected_ids)
