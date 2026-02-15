@@ -1,8 +1,10 @@
+from typing import cast
+
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
 
 from .models import Todo, TodoItem
 from .serializers import TodoItemSerializer, TodoSerializer
@@ -32,9 +34,10 @@ def list_todos(request):
         if not serializer.is_valid():
             return _bad_request(serializer.errors)
 
-        serializer.save(user=request.user)
+        todo = cast(Todo, serializer.save(user=request.user))
         return Response(
-            {'message': 'Todo created successfully'}, status=status.HTTP_200_OK
+            {'message': 'Todo created successfully', 'id': todo.pk},
+            status=status.HTTP_200_OK,
         )
 
 

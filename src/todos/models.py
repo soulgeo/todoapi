@@ -9,7 +9,7 @@ class Todo(models.Model):
     )
     description = models.TextField(default="")
     created_at = models.DateTimeField(auto_now_add=True)
-    update_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
         return self.name
@@ -20,7 +20,7 @@ class TodoItem(models.Model):
     todo = models.ForeignKey(Todo, on_delete=models.CASCADE, related_name='items')
     is_complete = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    update_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
         return self.name
