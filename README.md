@@ -1,6 +1,6 @@
 # Todo-list RESTful API
 
-An API service built with the Django REST Framework for the purposes of the Software as a Service, Features complete unit tests and httpie tests.\
+An API service built with the Django REST Framework for the purposes of the Software as a Service course at the University of Piraeus. Features complete unit tests and httpie tests.\
 \
 The application is dockerized and deployed using fly.io, and you can read its openapi-style manual here: https://todoapi-bitter-forest-5754.fly.dev/api/docs/
 
@@ -28,4 +28,5 @@ Below are instructions on how to run the application on a development environmen
     ```
 
 The application will be available at `http://localhost:8000`.
+
 
